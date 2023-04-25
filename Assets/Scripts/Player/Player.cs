@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-    private float speed = 10f;
+    private float speed = 3f;
 
     private void FixedUpdate()
     {

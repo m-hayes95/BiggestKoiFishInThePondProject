@@ -7,18 +7,26 @@ public class EnemyAI : MonoBehaviour
 {
     [SerializeField]
     private GameObject enemyRayCastOrigin;
-    public Rigidbody2D rigidbody2D;
-    private float speed = 100f;
+    public Rigidbody2D r;
+    private float speed = 90f;
+    private RaycastHit2D rcHit;
 
     private void Start()
     {
-        rigidbody2D = GetComponent<Rigidbody2D>();
+        r = GetComponent<Rigidbody2D>();
     }
 
     private void FixedUpdate()
     {
         DrawEnemyRayCast();
         EnemyMovement();
+        if (rcHit)
+        {
+            Debug.Log(gameObject.name + "Enemy hit " + rcHit.collider.name);
+            // Rotate at a random direction when enemy hits something.
+            float randomTurnDir = Random.Range(-180, 180);
+            transform.Rotate(0, 0, randomTurnDir);
+        }
     }
 
     private void DrawEnemyRayCast()
@@ -28,19 +36,13 @@ public class EnemyAI : MonoBehaviour
         Debug.DrawRay(enemyRayCastOrigin.transform.position, 
             transform.TransformDirection(Vector2.right) * rayCastLength, Color.magenta);
 
-        RaycastHit2D hit = Physics2D.Raycast(enemyRayCastOrigin.transform.position,
+        rcHit = Physics2D.Raycast(enemyRayCastOrigin.transform.position,
             transform.TransformDirection(Vector2.right), rayCastLength);
-        
-
-        if (hit)
-        {
-            Debug.Log(gameObject.name + "Enemy hit " + hit.collider.name);
-        }
     }
 
     private void EnemyMovement()
     {
-        rigidbody2D.AddRelativeForce(Vector2.right * speed * Time.deltaTime);
+        r.AddRelativeForce(Vector2.right * speed * Time.deltaTime);
     }
 
 
