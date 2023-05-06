@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-    private float speed = 3f;
+    private float speed = 5f;
 
     private void FixedUpdate()
     {
@@ -17,11 +17,11 @@ public class Player : MonoBehaviour
     {
         float h = Input.GetAxis("Horizontal");
         float v = Input.GetAxis("Vertical");
-        Vector3 moveDir = new Vector3(h, v, 0);
+        Vector3 moveDir = new Vector3(h, 0, v);
         return moveDir;
     }
 
-    private void OnCollisionEnter2D(Collision2D collision)
+    private void OnCollisionEnter(Collision collision)
     {
         if(collision.gameObject.CompareTag("Enemy"))
         {
@@ -51,7 +51,7 @@ public class Player : MonoBehaviour
         Vector3 newPlayerSizeAfterEating = 
             new Vector3(currentPlayerSize.x * playerSizeMultipler, 
             currentPlayerSize.y * playerSizeMultipler, 
-            currentPlayerSize.z);
+            currentPlayerSize.z * playerSizeMultipler);
         transform.localScale = newPlayerSizeAfterEating;
     }
 }

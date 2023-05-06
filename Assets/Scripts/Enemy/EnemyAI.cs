@@ -8,81 +8,74 @@ public class EnemyAI : MonoBehaviour
 {
     [SerializeField]
     private GameObject enemyRayCastOrigin;
-    public Rigidbody2D r;
+    public Rigidbody r;
    
-    private float speed =2f, runAwaySpeed = 10f, distance = .5f, range = 5f;
-    private RaycastHit2D rcHit;
+    private float speed =2f, runAwaySpeed = 10f, distance = .5f, maxDistance = 10f;
+    
+    private RaycastHit rcHit;
 
-    Vector2 newWaypoint;
+    Vector3 newWaypoint;
+    Vector3 rayCastVector;
 
     private void Start()
     {
-        r = GetComponent<Rigidbody2D>();
+        r = GetComponent<Rigidbody>();
     }
 
     private void FixedUpdate()
     {
         DrawEnemyRayCast();
 
-        Vector3 scale = transform.localScale;
-        if (newWaypoint.x > transform.position.x)
-        {
-            scale.x = Mathf.Abs(scale.x) * -1;
-        }
-        else
-        {
-            scale.x = Mathf.Abs(scale.x);
-        }
-
-        transform.localScale = scale;
-
-        transform.position = Vector2.MoveTowards(transform.position, newWaypoint, speed * Time.deltaTime);
+        transform.position = Vector3.MoveTowards(transform.position, newWaypoint, speed * Time.deltaTime);
+        transform.LookAt(newWaypoint);
         
-        
-        if (Vector2.Distance(transform.position, newWaypoint) < distance)
+        if (Vector3.Distance(transform.position, newWaypoint) < distance)
         {
             SetNewMoveTowardsVector();
-
         }
 
-        
-         // If enmemy runs into player, quickly run away in a random direction.
-        if (rcHit)
+        // If enmemy runs into player, quickly run away in a random direction.
+        if (Physics.Raycast(enemyRayCastOrigin.transform.position, rayCastVector, out rcHit))
         {
             Debug.Log(gameObject.name + "Enemy hit " + rcHit.collider.name);
-            float randomTurnDir = Random.Range(-180, 180);
-            transform.Rotate(0, 0, randomTurnDir);
-            SetNewMoveTowardsVector();
-            EnemyScaredRunAway();
-        }
 
-       
+            if (rcHit.collider != null && rcHit.collider.CompareTag("Player"))
+            {
+                float randomTurnDir = Random.Range(-180, 180);
+                transform.Rotate(0, randomTurnDir, 0);
+                SetNewMoveTowardsVector();
+                //EnemyScaredRunAway();
+            }
+        }
     }
 
     private void DrawEnemyRayCast()
     {
         // Create a raycast and check what it hits
         float rayCastLength = 2f;
-        Debug.DrawRay(enemyRayCastOrigin.transform.position, 
-            transform.TransformDirection(Vector2.right) * rayCastLength, Color.magenta);
+        rayCastVector = enemyRayCastOrigin.transform.TransformDirection(Vector3.forward) * rayCastLength;
 
-        rcHit = Physics2D.Raycast(enemyRayCastOrigin.transform.position,
-            transform.TransformDirection(Vector2.right), rayCastLength);
+        Debug.DrawRay(enemyRayCastOrigin.transform.position, 
+            rayCastVector, Color.magenta);
+
+        
+        //rcHit = Physics.Raycast(enemyRayCastOrigin.transform.position,
+            //transform.TransformDirection(new Vector3(0,0,1)), rayCastLength);
     }
 
     private void EnemyScaredRunAway()
     {
-        r.AddRelativeForce(Vector2.right * runAwaySpeed * Time.deltaTime);
+        r.AddForceAtPosition(Vector3.forward * runAwaySpeed, transform.position, ForceMode.Acceleration);
     }
 
     private void SetNewMoveTowardsVector()
     {
-        newWaypoint = new Vector2(Random.Range(-range,range), Random.Range(-range, range));
+        newWaypoint = new Vector3(Random.Range(-maxDistance, maxDistance), 0, Random.Range(-maxDistance, maxDistance));
     }
 
     private void OnDrawGizmos()
     {
-        float sphereRadius = 0.15f;
+        float sphereRadius = 0.1f;
         //Vector3 drawnSphereLocation = new Vector3(newWaypoint.x, newWaypoint.y, 0);
         Gizmos.DrawSphere(newWaypoint, sphereRadius);
     }
